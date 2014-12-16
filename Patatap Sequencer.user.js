@@ -21,6 +21,7 @@ function doit() {
 seqSteps = 12;
 seqInterval = 100;
 seqCurrentStep = 0;
+seqPlaying = false;
 
 function step(s) {
     seqCurrentStep = s%seqSteps;
@@ -37,7 +38,6 @@ function step(s) {
     	setTimeout(function() { step( (s+1)%seqSteps ) }, seqInterval);
 }
 
-seqPlaying = false;
 
 seqPlay = function() {
     if(!seqPlaying) {
@@ -45,7 +45,7 @@ seqPlay = function() {
 		step(0);
     } else {
     	seqPlaying = false;
-        setTimeout(function() { $(".element",seqWin.document).css('border-width','1px'); }, seqInterval); //unbold the boxes
+        setTimeout(function() { $(".element",seqWin.document).css('border-color','rgb(255, 127, 80)'); }, seqInterval); //recolor boxes
     }
 }
 
@@ -156,12 +156,14 @@ seqRun = function() {
         if (seqField[char] !== undefined) {
             if (seqField[char][number] === 0) {
                 seqField[char][number] = 1;
-                console.log('seqElement_' + char + '_' + number);
                 $('#seqElement_' + char + '_' + number, seqWin.document).css('background-color','coral');
             } else {
                 seqField[char][number] = 0;
                 $('#seqElement_' + char + '_' + number, seqWin.document).css('background-color','white');
             }
+        }
+        if(event.keyCode === 32) {
+        	seqPlay();
         }
     });
     
