@@ -22,6 +22,7 @@ seqSteps = 12;
 seqInterval = 100;
 seqCurrentStep = 0;
 seqPlaying = false;
+seqRecording = true;
 
 function step(s) {
     seqCurrentStep = s%seqSteps;
@@ -42,9 +43,11 @@ function step(s) {
 seqPlay = function() {
     if(!seqPlaying) {
         seqPlaying = true;
+        $('#playPause',seqWin.document).value('PAUSE');
 		step(0);
     } else {
     	seqPlaying = false;
+        $('#playPause',seqWin.document).text('PLAY');
         setTimeout(function() { $(".element",seqWin.document).css('border-color','rgb(255, 127, 80)'); }, seqInterval); //recolor boxes
     }
 }
@@ -97,6 +100,12 @@ seqRun = function() {
           "  left: 0px;" +
           "  background-color: wheat;" +
           "  border: 1px solid #101010;" + 
+          "  }" +
+          "input {" +
+          "  width: 50px;" +
+          "  }" +
+          "#controlsRow > * {" +
+          "  margin: 4px;" +
           "  }" +
           "</style>");
     
@@ -153,22 +162,40 @@ seqRun = function() {
     $(seqWin).keydown(function(event) {
     	var char = String.fromCharCode(event.keyCode);
         var number = seqCurrentStep;
-        if (seqField[char] !== undefined) {
+        if(event.keyCode === 32) {
+        	seqPlay();
+        }
+        if (event.keyCode === 27) { //ESC
+            if(seqRecording) {
+            	seqRecording = false;
+                $('#reqTag',seqWin.document).text('REC OFF');
+            } else {
+            	seqRecording = true;
+                $('#reqTag',seqWin.document).text('REC ON');
+            }
+            return;
+        }
+        if (!seqRecording) {
+         	simulateKeyPress(char);
+            return;
+        }
+        if (seqRecording && seqField[char] !== undefined) {
             if (seqField[char][number] === 0) {
                 seqField[char][number] = 1;
                 $('#seqElement_' + char + '_' + number, seqWin.document).css('background-color','coral');
+                simulateKeyPress(char);
             } else {
                 seqField[char][number] = 0;
                 $('#seqElement_' + char + '_' + number, seqWin.document).css('background-color','white');
             }
         }
-        if(event.keyCode === 32) {
-        	seqPlay();
-        }
     });
     
     //Draw the controls
-    write('<br><input type=button value=play/pause id=playPause>');
+    
+        write('<div class=row id=controlsRow>');
+    
+    write('<br><input type=button value=PLAY id=playPause>');
     $(seqWin['playPause']).click(function() {
         seqPlay();
     });
@@ -185,11 +212,17 @@ seqRun = function() {
     write('<input type=text value=' + seqSteps + ' id=stepCount>');
     $(seqWin['stepCount']).change(function(ev) {
         seqSteps = ev.target.value;
+        $(seqWin).unbind('keydown');
         seqRun();
     });
     
     
     write('<span id=hoverTag></span>');
+    write('<span id=recTag>REC ON</span>');
+    write('<span >(esc to toggle)</span>');
+    
+    
+        write('</div>');
 }
 
 $(seqRun);
